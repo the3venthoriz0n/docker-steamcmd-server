@@ -71,26 +71,33 @@ if [ -d "${SERVER_DIR}/steamapps" ] ; then
 fi
 
 echo "---Checking if configuration is in place---"
-# The packaged config lives inside the SteamCMD-managed file set, so a 'validate' run would
-# revert any edits. Keep the live config outside that file set and point the server at it with
-# the officially supported -TripwireServerConfig flag.
+
+SERVER_CONFIG="${SERVER_CONFIG:-${SERVER_DIR}/${GAME_NAME}/config/TripwireServer.ini}"
+mkdir -p "$(dirname "${SERVER_CONFIG}")"
+
+
+INIT_MARKER="${SERVER_DIR}/.deceiveinc_initialized"
 CONFIG_SEEDED="false"
-if [ ! -f "${SERVER_CONFIG}" ]; then
-  echo "---Configuration not found, seeding from packaged defaults...---"
-  mkdir -p "$(dirname "${SERVER_CONFIG}")"
-  if [ -f ${SERVER_DIR}/${GAME_NAME}/TripwireServer.ini ]; then
-    cp ${SERVER_DIR}/${GAME_NAME}/TripwireServer.ini "${SERVER_CONFIG}"
-    CONFIG_SEEDED="true"
+
+if [ ! -f "${INIT_MARKER}" ]; then
+  if [ ! -f "${SERVER_CONFIG}" ]; then
+    echo "---Configuration not found, seeding from packaged defaults...---"
+    if [ -f ${SERVER_DIR}/${GAME_NAME}/TripwireServer.ini ]; then
+      cp ${SERVER_DIR}/${GAME_NAME}/TripwireServer.ini "${SERVER_CONFIG}"
+      CONFIG_SEEDED="true"
+    else
+      echo "---Can't find packaged configuration, server will start with built-in defaults!---"
+    fi
   else
-    echo "---Can't find packaged configuration, server will start with built-in defaults!---"
+    echo "---Configuration template already in place, setting seeding marker...---"
+    CONFIG_SEEDED="true"
   fi
+  touch "${INIT_MARKER}"
 else
-  echo "---Configuration found, continuing...---"
+  echo "---Existing configuration found, continuing...---"
 fi
 
-# Container variables only provide the INITIAL values, written once when the configuration is
-# first created. After that the configuration file is authoritative and is never rewritten, so
-# it stays hand-editable.
+
 if [ "${CONFIG_SEEDED}" == "true" ]; then
   echo "---Writing initial settings into the new configuration---"
   if [ ! -z "${GAME_PORT}" ]; then
@@ -99,8 +106,7 @@ if [ "${CONFIG_SEEDED}" == "true" ]; then
   if [ ! -z "${QUERY_PORT}" ]; then
     sed -i "s/^QueryPort=.*/QueryPort=${QUERY_PORT}/" "${SERVER_CONFIG}"
   fi
-  # UPnP uses SSDP multicast, which cannot reach a router from a bridged container.
-  # Default it off; users on host networking can turn it back on in the config.
+
   if [ "${DISABLE_UPNP}" == "true" ]; then
     sed -i "s/^bEnableUPnP=.*/bEnableUPnP=false/" "${SERVER_CONFIG}"
   fi
@@ -143,13 +149,13 @@ chmod -R ${DATA_PERM} ${DATA_DIR}
 echo "---Server ready---"
 
 echo "---Start Server---"
-# Call the server binary directly rather than the shipped DeceiveIncServer.sh wrapper: that
-# wrapper does not 'exec' its child, so it would swallow the SIGTERM sent on container stop.
+
 if [ -f ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shipping ]; then
   cd ${SERVER_DIR}
   chmod +x ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shipping
+
   exec ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shipping ${GAME_NAME} \
-    -TripwireServerConfig="${SERVER_CONFIG}" ${GAME_PARAMS} ${GAME_PARAMS_EXTRA}
+    ${GAME_PARAMS} ${GAME_PARAMS_EXTRA}
 else
   echo "---Something went wrong, can't find the executable, putting container into sleep mode!---"
   sleep infinity
