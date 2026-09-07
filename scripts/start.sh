@@ -28,8 +28,12 @@ echo "---Starting...---"
 term_handler() {
 	# The server is started through 'su', which does not forward signals to its child,
 	# so target the game process directly by name and wait for it to exit cleanly.
-	kill -SIGTERM $(pidof DeceiveIncServer-Linux-Shipping)
-	tail --pid=$(pidof DeceiveIncServer-Linux-Shipping) -f 2>/dev/null
+	# Guard against an empty pidof: the server may not have finished installing yet.
+	SERVER_PID="$(pidof DeceiveIncServer-Linux-Shipping)"
+	if [ ! -z "${SERVER_PID}" ]; then
+		kill -SIGTERM ${SERVER_PID}
+		tail --pid=${SERVER_PID} -f 2>/dev/null
+	fi
 }
 
 trap 'kill ${!}; term_handler' SIGTERM
