@@ -1,19 +1,26 @@
-FROM ich777/debian-baseimage:bullseye_amd64
+FROM ich777/debian-baseimage
 
-LABEL org.opencontainers.image.authors="admin@minenet.at"
-LABEL org.opencontainers.image.source="https://github.com/ich777/docker-steamcmd-server"
+LABEL org.opencontainers.image.authors="the3venthoriz0n"
+LABEL org.opencontainers.image.source="https://github.com/the3venthoriz0n/docker-steamcmd-server"
 
+# lib32* are required by SteamCMD itself (it ships a 32bit binary).
+# The Deceive Inc. server binary is 64bit and bundles its own PhysX/Steamworks/EOS
+# libraries via RPATH, so it needs nothing extra from apt.
 RUN apt-get update && \
-	apt-get -y install --no-install-recommends lib32gcc-s1 lib32stdc++6 lib32z1 && \
+	apt-get -y install --no-install-recommends lib32gcc-s1 lib32stdc++6 ca-certificates && \
 	rm -rf /var/lib/apt/lists/*
 
 ENV DATA_DIR="/serverdata"
 ENV STEAMCMD_DIR="${DATA_DIR}/steamcmd"
 ENV SERVER_DIR="${DATA_DIR}/serverfiles"
-ENV GAME_ID="template"
-ENV GAME_NAME="template"
-ENV GAME_PARAMS="template"
-ENV GAME_PORT=27015
+ENV GAME_ID="5007710"
+ENV GAME_NAME="DeceiveInc"
+ENV GAME_PARAMS=""
+ENV GAME_PARAMS_EXTRA=""
+ENV GAME_PORT=7777
+ENV QUERY_PORT=7778
+ENV SERVER_CONFIG="${SERVER_DIR}/config/TripwireServer.ini"
+ENV DISABLE_UPNP="true"
 ENV VALIDATE=""
 ENV UMASK=000
 ENV UID=99
