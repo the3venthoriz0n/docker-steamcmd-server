@@ -71,67 +71,20 @@ if [ -d "${SERVER_DIR}/steamapps" ] ; then
 fi
 
 echo "---Checking if configuration is in place---"
+UE_CONFIG_DIR="${SERVER_DIR}/${GAME_NAME}/Saved/Config/LinuxServer"
+SERVER_CONFIG="${UE_CONFIG_DIR}/GameUserSettings.ini"
+mkdir -p "${UE_CONFIG_DIR}"
 
-# Note the capital 'C' in Config
-SERVER_CONFIG="${SERVER_CONFIG:-${SERVER_DIR}/${GAME_NAME}/Config/TripwireServer.ini}"
-mkdir -p "$(dirname "${SERVER_CONFIG}")"
-
-INIT_MARKER="${SERVER_DIR}/.deceiveinc_initialized"
-CONFIG_SEEDED="false"
-
-if [ ! -f "${INIT_MARKER}" ]; then
-  if [ ! -f "${SERVER_CONFIG}" ]; then
-    echo "---Configuration not found, seeding from packaged defaults...---"
-    if [ -f ${SERVER_DIR}/${GAME_NAME}/TripwireServer.ini ]; then
-      cp ${SERVER_DIR}/${GAME_NAME}/TripwireServer.ini "${SERVER_CONFIG}"
-      CONFIG_SEEDED="true"
-    else
-      echo "---Can't find packaged configuration, server will start with built-in defaults!---"
-    fi
-  else
-    echo "---Configuration template already in place, setting seeding marker...---"
-    CONFIG_SEEDED="true"
-  fi
-  touch "${INIT_MARKER}"
+if [ ! -f "${SERVER_CONFIG}" ]; then
+  echo "---Configuration not found, creating default GameUserSettings.ini---"
+  cat <<EOF > "${SERVER_CONFIG}"
+[/Script/Engine.GameSession]
+ServerName=Deceive Inc Player Server
+MaxPlayers=12
+EOF
+  echo "---Default configuration created successfully---"
 else
-  echo "---Existing configuration found, continuing...---"
-fi
-
-if [ "${CONFIG_SEEDED}" == "true" ]; then
-  echo "---Writing initial settings into the new configuration---"
-  if [ ! -z "${GAME_PORT}" ]; then
-    sed -i "s/^GamePort=.*/GamePort=${GAME_PORT}/" "${SERVER_CONFIG}"
-  fi
-  if [ ! -z "${QUERY_PORT}" ]; then
-    sed -i "s/^QueryPort=.*/QueryPort=${QUERY_PORT}/" "${SERVER_CONFIG}"
-  fi
-
-  if [ "${DISABLE_UPNP}" == "true" ]; then
-    sed -i "s/^bEnableUPnP=.*/bEnableUPnP=false/" "${SERVER_CONFIG}"
-  fi
-  echo "---From now on ${SERVER_CONFIG} is authoritative, edit it directly to change settings---"
-fi
-
-if [ -f "${SERVER_CONFIG}" ]; then
-  echo "---Checking configuration against container settings---"
-  CFG_GAME_PORT="$(grep -oP '^GamePort=\K.*' "${SERVER_CONFIG}" | tr -d '[:space:]')"
-  CFG_QUERY_PORT="$(grep -oP '^QueryPort=\K.*' "${SERVER_CONFIG}" | tr -d '[:space:]')"
-  CFG_UPNP="$(grep -oP '^bEnableUPnP=\K.*' "${SERVER_CONFIG}" | tr -d '[:space:]')"
-
-  if [ ! -z "${GAME_PORT}" ] && [ ! -z "${CFG_GAME_PORT}" ] && [ "${GAME_PORT}" != "${CFG_GAME_PORT}" ]; then
-    echo "---WARNING: The server will listen on GamePort ${CFG_GAME_PORT} but this container publishes ${GAME_PORT}!---"
-    echo "---WARNING: The configuration file wins. Change GamePort in ${SERVER_CONFIG} or fix the port mapping.---"
-  fi
-  if [ ! -z "${QUERY_PORT}" ] && [ ! -z "${CFG_QUERY_PORT}" ] && [ "${QUERY_PORT}" != "${CFG_QUERY_PORT}" ]; then
-    echo "---WARNING: The server will answer queries on QueryPort ${CFG_QUERY_PORT} but this container publishes ${QUERY_PORT}!---"
-    echo "---WARNING: The configuration file wins. Change QueryPort in ${SERVER_CONFIG} or fix the port mapping.---"
-  fi
-  if [ ! -z "${CFG_GAME_PORT}" ] && [ "${CFG_GAME_PORT}" == "${CFG_QUERY_PORT}" ]; then
-    echo "---WARNING: GamePort and QueryPort are both ${CFG_GAME_PORT}, the server will shift one of them by 1!---"
-  fi
-  if [ "${CFG_UPNP}" == "true" ]; then
-    echo "---WARNING: bEnableUPnP is true, this only works with host networking and is wasted time otherwise.---"
-  fi
+  echo "---Existing GameUserSettings.ini found, keeping current settings---"
 fi
 
 echo "---Prepare Server---"
@@ -154,7 +107,6 @@ if [ -f ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shippin
   chmod +x ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shipping
 
   exec ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shipping ${GAME_NAME} \
-    -ServerConfig="${SERVER_CONFIG}" \
     ${GAME_PARAMS} ${GAME_PARAMS_EXTRA}
 else
   echo "---Something went wrong, can't find the executable, putting container into sleep mode!---"

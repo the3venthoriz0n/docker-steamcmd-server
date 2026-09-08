@@ -7,8 +7,8 @@ LABEL org.opencontainers.image.source="https://github.com/the3venthoriz0n/docker
 # The Deceive Inc. server binary is 64bit and bundles its own PhysX/Steamworks/EOS
 # libraries via RPATH, so it needs nothing extra from apt.
 RUN apt-get update && \
-	apt-get -y install --no-install-recommends lib32gcc-s1 lib32stdc++6 ca-certificates && \
-	rm -rf /var/lib/apt/lists/*
+    apt-get -y install --no-install-recommends lib32gcc-s1 lib32stdc++6 ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 ENV DATA_DIR="/serverdata"
 ENV STEAMCMD_DIR="${DATA_DIR}/steamcmd"
@@ -19,8 +19,6 @@ ENV GAME_PARAMS=""
 ENV GAME_PARAMS_EXTRA=""
 ENV GAME_PORT=7777
 ENV QUERY_PORT=7778
-ENV SERVER_CONFIG="${SERVER_DIR}/config/TripwireServer.ini"
-ENV DISABLE_UPNP="true"
 ENV VALIDATE=""
 ENV UMASK=000
 ENV UID=99
@@ -31,11 +29,11 @@ ENV USER="steam"
 ENV DATA_PERM=770
 
 RUN mkdir $DATA_DIR && \
-	mkdir $STEAMCMD_DIR && \
-	mkdir $SERVER_DIR && \
-	useradd -d $DATA_DIR -s /bin/bash $USER && \
-	chown -R $USER $DATA_DIR && \
-	ulimit -n 2048
+    mkdir $STEAMCMD_DIR && \
+    mkdir $SERVER_DIR && \
+    useradd -d $DATA_DIR -s /bin/bash $USER && \
+    chown -R $USER $DATA_DIR && \
+    ulimit -n 2048
 
 ADD /scripts/ /opt/scripts/
 RUN chmod -R 770 /opt/scripts/
