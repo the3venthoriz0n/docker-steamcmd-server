@@ -155,6 +155,7 @@ if [ -f ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shippin
   chmod +x ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shipping
 
   exec ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shipping ${GAME_NAME} \
+    -ServerConfig="${SERVER_CONFIG}" \
     ${GAME_PARAMS} ${GAME_PARAMS_EXTRA}
 else
   echo "---Something went wrong, can't find the executable, putting container into sleep mode!---"
