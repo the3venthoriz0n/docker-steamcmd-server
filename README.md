@@ -34,3 +34,44 @@ The Deceive Inc. Dedicated Server (App ID 5007710) installs with an **anonymous*
 so `USERNAME` and `PASSWRD` can be left blank.
 
 ## Run example
+
+```
+docker run --name DeceiveInc -d
+
+-p 7777:7777/udp -p 7778:7778/udp
+
+--env 'GAME_ID=5007710'
+
+--env 'GAME_PORT=7777'
+
+--env 'QUERY_PORT=7778'
+
+--env 'UID=99'
+
+--env 'GID=100'
+
+--volume /path/to/steamcmd:/serverdata/steamcmd
+
+--volume /path/to/deceiveinc:/serverdata/serverfiles
+
+the3venthoriz0n/steamcmd:deceiveinc
+
+```
+
+## Troubleshooting
+Search the server log for `[NetPosture]` to see the detected public address and whether inbound UDP is arriving at all. If players outside your network never see the server, start there.
+
+Useful log markers:
+- `FDIServerPingResponder: ... first inbound echo on query port` - a client's ping actually arrived.
+- `GameNetDriver ... listening on port 7777` - the game port is bound.
+- No `PreLogin` when someone tries to join means their packets never reached the server at all,
+  which is a forwarding/networking problem rather than a server one.
+
+Region auto-detection (`ServerRegion=` left empty) can fail inside a container - every Epic ping
+host times out and the server registers with an empty region, which may hide it from browser
+filters. Set `ServerRegion` explicitly (`us-east`, `us-central`, `us-west`, `eu`, `oce`, `br`,
+`asia`, `me`).
+
+This Docker was mainly edited for better use with Unraid, if you don't use Unraid you should definitely try it!
+
+This Docker is forked from ich777's SteamCMD server framework, thank you for this wonderfull Docker.
