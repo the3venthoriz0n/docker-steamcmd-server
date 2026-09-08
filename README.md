@@ -1,9 +1,9 @@
 # SteamCMD in Docker optimized for Unraid
 This Docker will download and install SteamCMD. It will also install the Deceive Inc. Dedicated Server and run it.
 
-**Configuration:** The configuration is located at: `.../serverfiles/DeceiveInc/Saved/Config/LinuxServer/GameUserSettings.ini`
+**Configuration:** The configuration is located at: `.../serverfiles/DeceiveInc/Saved/Config/LinuxServer/TripwireServer.ini`
 
-On first boot, the container automatically generates a default `GameUserSettings.ini` template if one does not already exist. Because Unreal Engine stores this file inside its `Saved` directory, SteamCMD updates and validation runs will **never** overwrite or revert your edits.
+On first boot, the container automatically generates a default `TripwireServer.ini` template if one does not already exist. Because Unreal Engine stores this file inside its `Saved` directory, SteamCMD updates and validation runs will **never** overwrite or revert your edits.
 
 You can edit this file directly on your host to configure your server name (`ServerName`), player counts, and other server settings.
 
@@ -22,6 +22,7 @@ You can also run multiple servers with only one SteamCMD directory!
 | GAME_NAME | Unreal Engine project name, also the name of the folder holding the server binary and packaged config. Do not change. | DeceiveInc |
 | GAME_PORT | UDP game port clients connect on. | 7777 |
 | QUERY_PORT | UDP query port the server browser pings. Must differ from GAME_PORT. | 7778 |
+| SERVER_CONFIG | Full path to the live server configuration stored in the persistent Saved directory. | /serverdata/serverfiles/DeceiveInc/Saved/Config/LinuxServer/TripwireServer.ini |
 | GAME_PARAMS | Enter your game parameters | blank |
 | GAME_PARAMS_EXTRA | Enter your Extra Game Parameters seperated with a space and - (eg: -useperfthreads -NoAsyncLoadingThread) | blank |
 | UID | User Identifier | 99 |

@@ -72,19 +72,24 @@ fi
 
 echo "---Checking if configuration is in place---"
 UE_CONFIG_DIR="${SERVER_DIR}/${GAME_NAME}/Saved/Config/LinuxServer"
-SERVER_CONFIG="${UE_CONFIG_DIR}/GameUserSettings.ini"
+SERVER_CONFIG="${UE_CONFIG_DIR}/TripwireServer.ini"
 mkdir -p "${UE_CONFIG_DIR}"
 
 if [ ! -f "${SERVER_CONFIG}" ]; then
-  echo "---Configuration not found, creating default GameUserSettings.ini---"
-  cat <<EOF > "${SERVER_CONFIG}"
-[/Script/Engine.GameSession]
+  echo "---Configuration not found, seeding from packaged defaults...---"
+  if [ -f "${SERVER_DIR}/${GAME_NAME}/TripwireServer.ini" ]; then
+    cp "${SERVER_DIR}/${GAME_NAME}/TripwireServer.ini" "${SERVER_CONFIG}"
+  else
+    echo "---Creating default TripwireServer.ini template---"
+    cat <<EOF > "${SERVER_CONFIG}"
+[ServerSettings]
 ServerName=Deceive Inc Player Server
 MaxPlayers=12
 EOF
-  echo "---Default configuration created successfully---"
+  fi
+  echo "---Configuration seeded successfully---"
 else
-  echo "---Existing GameUserSettings.ini found, keeping current settings---"
+  echo "---Existing TripwireServer.ini found, keeping current settings---"
 fi
 
 echo "---Prepare Server---"
@@ -107,6 +112,7 @@ if [ -f ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shippin
   chmod +x ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shipping
 
   exec ${SERVER_DIR}/${GAME_NAME}/Binaries/Linux/DeceiveIncServer-Linux-Shipping ${GAME_NAME} \
+    -ServerConfig="${SERVER_CONFIG}" \
     ${GAME_PARAMS} ${GAME_PARAMS_EXTRA}
 else
   echo "---Something went wrong, can't find the executable, putting container into sleep mode!---"
