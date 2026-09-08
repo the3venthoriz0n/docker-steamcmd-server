@@ -9,12 +9,12 @@ fi
 echo "---Update SteamCMD---"
 if [ "${USERNAME}" == "" ]; then
   ${STEAMCMD_DIR}/steamcmd.sh \
-  +login anonymous \
-  +quit
+    +login anonymous \
+    +quit
 else
   ${STEAMCMD_DIR}/steamcmd.sh \
-  +login ${USERNAME} ${PASSWRD} \
-  +quit
+    +login ${USERNAME} ${PASSWRD} \
+    +quit
 fi
 
 echo "---Update Server---"
@@ -22,31 +22,31 @@ if [ "${USERNAME}" == "" ]; then
   if [ "${VALIDATE}" == "true" ]; then
     echo "---Validating installation---"
     ${STEAMCMD_DIR}/steamcmd.sh \
-    +force_install_dir ${SERVER_DIR} \
-    +login anonymous \
-    +app_update ${GAME_ID} validate \
-    +quit
+      +force_install_dir ${SERVER_DIR} \
+      +login anonymous \
+      +app_update ${GAME_ID} validate \
+      +quit
   else
     ${STEAMCMD_DIR}/steamcmd.sh \
-    +force_install_dir ${SERVER_DIR} \
-    +login anonymous \
-    +app_update ${GAME_ID} \
-    +quit
+      +force_install_dir ${SERVER_DIR} \
+      +login anonymous \
+      +app_update ${GAME_ID} \
+      +quit
   fi
 else
   if [ "${VALIDATE}" == "true" ]; then
     echo "---Validating installation---"
     ${STEAMCMD_DIR}/steamcmd.sh \
-    +force_install_dir ${SERVER_DIR} \
-    +login ${USERNAME} ${PASSWRD} \
-    +app_update ${GAME_ID} validate \
-    +quit
+      +force_install_dir ${SERVER_DIR} \
+      +login ${USERNAME} ${PASSWRD} \
+      +app_update ${GAME_ID} validate \
+      +quit
   else
     ${STEAMCMD_DIR}/steamcmd.sh \
-    +force_install_dir ${SERVER_DIR} \
-    +login ${USERNAME} ${PASSWRD} \
-    +app_update ${GAME_ID} \
-    +quit
+      +force_install_dir ${SERVER_DIR} \
+      +login ${USERNAME} ${PASSWRD} \
+      +app_update ${GAME_ID} \
+      +quit
   fi
 fi
 
@@ -56,25 +56,25 @@ if [ -d "${SERVER_DIR}/steamapps" ] ; then
     rm -f ${SERVER_DIR}/steamapps/appmanifest_${GAME_ID}.acf
     if [ "${USERNAME}" == "" ]; then
       ${STEAMCMD_DIR}/steamcmd.sh \
-      +force_install_dir ${SERVER_DIR} \
-      +login anonymous \
-      +app_update ${GAME_ID} \
-      +quit
+        +force_install_dir ${SERVER_DIR} \
+        +login anonymous \
+        +app_update ${GAME_ID} \
+        +quit
     else
       ${STEAMCMD_DIR}/steamcmd.sh \
-      +force_install_dir ${SERVER_DIR} \
-      +login ${USERNAME} ${PASSWRD} \
-      +app_update ${GAME_ID} \
-      +quit
+        +force_install_dir ${SERVER_DIR} \
+        +login ${USERNAME} ${PASSWRD} \
+        +app_update ${GAME_ID} \
+        +quit
     fi
   fi
 fi
 
 echo "---Checking if configuration is in place---"
 
-SERVER_CONFIG="${SERVER_CONFIG:-${SERVER_DIR}/${GAME_NAME}/config/TripwireServer.ini}"
+# Note the capital 'C' in Config
+SERVER_CONFIG="${SERVER_CONFIG:-${SERVER_DIR}/${GAME_NAME}/Config/TripwireServer.ini}"
 mkdir -p "$(dirname "${SERVER_CONFIG}")"
-
 
 INIT_MARKER="${SERVER_DIR}/.deceiveinc_initialized"
 CONFIG_SEEDED="false"
@@ -96,7 +96,6 @@ if [ ! -f "${INIT_MARKER}" ]; then
 else
   echo "---Existing configuration found, continuing...---"
 fi
-
 
 if [ "${CONFIG_SEEDED}" == "true" ]; then
   echo "---Writing initial settings into the new configuration---"
